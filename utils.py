@@ -19,7 +19,8 @@ def dm(p):
     if not os.path.exists(p):
         os.makedirs(p)
 
-def checksum(s):
+def crc(s):
+    """Basic Redundancy check"""
     k=0
     g=(len(s)/2)*2
     o=0
@@ -36,7 +37,16 @@ def checksum(s):
     a=~k
     a&=0xffff
     a=a>>8|(a<<8&0xff00)
-    return hex(a)
+    return a
+
+def ntlm(s):
+    import hashlib,binascii
+    hash1 = hashlib.new('md4', "s".encode('utf-16le')).digest()
+    return binascii.hexlify(hash1)
+
+def tobytes(s):
+    b = [i.encode('hex') for i in s]
+    return ''.join('\\x'+i for i in b)
 
 def dupecheck(object,minimum=1):
     """ Check for duplicates in a list, returns the item if it appears more than the minimum. """
