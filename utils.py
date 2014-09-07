@@ -19,6 +19,23 @@ def dm(p):
     if not os.path.exists(p):
         os.makedirs(p)
 
+def nhex(n):
+    """int to 2-byte hex"""
+    if n == 0:
+        return "00"
+    else:
+        return hex(n).rstrip("L").lstrip("0x") or "0"
+
+def hexn(s):
+    """hex to integer"""
+    return int(float.fromhex(s))
+
+
+def center(s):
+    """center-justify a string on an 80-wide windows terminal"""
+    n = len(s)
+    return ' '*(40-(n/2))+s+' '*(40-(n/2))
+
 def crc(s):
     """Basic Redundancy check"""
     k=0
@@ -40,11 +57,13 @@ def crc(s):
     return a
 
 def ntlm(s):
+    """ntlm hashing function"""
     import hashlib,binascii
     hash1 = hashlib.new('md4', "s".encode('utf-16le')).digest()
     return binascii.hexlify(hash1)
 
 def tobytes(s):
+    """byte maker"""
     b = [i.encode('hex') for i in s]
     return ''.join('\\x'+i for i in b)
 
@@ -454,7 +473,7 @@ def randprob(dict):
     keys = [i for i in dict]
 
     if sum(parts) != 100:
-        raise ValueError, "The sum of all the keys' values must equal 100."
+        raise ValueError, "The sum of all the keys' values must equal 100. Yours equal {0}".format(sum(parts))
 
     ranges = incrup(parts, r)
     thevalue = random.randint(1,100)
