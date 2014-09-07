@@ -1,4 +1,4 @@
-import collections, string, datetime, random, math, os
+import collections, string, datetime, random, math, os, sys, base64
 
 """general laziness utilities"""
 
@@ -13,6 +13,30 @@ class Fail(Exception):
 class ArgumentError(Exception):
     """Exception raised by invalid arguments"""
     pass
+
+class Encrypt(object):
+    """
+    Obscurity based encryption
+
+    """
+    def __init__(self, string):
+        self.string = string
+    def encode(self, password):
+        enc = []
+        for i in range(len(self.string)):
+            key_c = password[i % len(password)]
+            enc_c = chr((ord(self.string[i]) + ord(key_c)) % 256)
+            enc.append(enc_c)
+        return base64.urlsafe_b64encode("".join(enc))
+
+    def decode(self, password):
+        dec = []
+        self.string = base64.urlsafe_b64decode(self.string)
+        for i in range(len(self.string)):
+            key_c = password[i % len(password)]
+            dec_c = chr((256 + ord(self.string[i]) - ord(key_c)) % 256)
+            dec.append(dec_c)
+        return "".join(dec)
 
 def dm(p):
     """make directory if it doesn't exist"""
@@ -30,6 +54,10 @@ def hexn(s):
     """hex to integer"""
     return int(float.fromhex(s))
 
+def stdout(s):
+    """updatable print that stays in one spot"""
+    sys.stdout.write("{0}\r".format(s))
+    sys.stdout.flush()
 
 def center(s):
     """center-justify a string on an 80-wide windows terminal"""
@@ -61,6 +89,12 @@ def ntlm(s):
     import hashlib,binascii
     hash1 = hashlib.new('md4', "s".encode('utf-16le')).digest()
     return binascii.hexlify(hash1)
+
+def squaredImage(list_of_pixel_tuples):
+    c = math.ceil
+    s = math.sqrt
+    """For PIL"""
+    return (int(c(s(len(list_of_pixel_tuples)))), int(c(s(len(list_of_pixel_tuples)))))
 
 def tobytes(s):
     """byte maker"""
