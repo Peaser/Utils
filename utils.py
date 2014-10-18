@@ -2,8 +2,6 @@ import collections, string, datetime, random, math, os, sys
 
 """general laziness utilities"""
 
-encodings = ['hex', 'base64', 'bz2', 'quopri', 'uu','zlib', 'rot_13','cp037', 'sjis']
-
 dt = os.environ['userprofile']+'\\Desktop\\' #Desktop EV
 
 class Fail(Exception):
@@ -28,8 +26,8 @@ class Encrypt(object):
     def encode(self, password):
         enc = []
         for i in range(len(self.string)):
-            key_c = password[i % len(password)]
-            enc_c = chr((ord(self.string[i]) + ord(key_c)) % 256)
+            key_c = password[i%len(password)]
+            enc_c = chr((ord(self.string[i])+ord(key_c))%256)
             enc.append(enc_c)
         return base64.urlsafe_b64encode("".join(enc))
 
@@ -45,16 +43,16 @@ class Encrypt(object):
 class Toggleable(object):
     """Toggleable boolean value
     Usage:
-        >>>b = Toggleable(True)
+        >>>b = Toggleable() #set to True by default; you can also use Toggleable(False) for example.
         >>>b
         True
         >>>b.toggle()
         >>>b
         False
 
-    It has it's uses."""
+    It has it's use somewhere."""
 
-    def __init__(self, boolean):
+    def __init__(self, boolean=True):
         self.boolean = boolean
         if type(self.boolean) is not bool:
             raise TypeError, 'type {} is not an acceptable type, must be bool'.format(type(self.boolean))
@@ -68,8 +66,6 @@ class Toggleable(object):
         elif self.boolean == False:
             self.boolean = True
 
-
-
 def dm(p):
     """make directory if it doesn't exist"""
     if not os.path.exists(p):
@@ -77,10 +73,7 @@ def dm(p):
 
 def nhex(n):
     """int to 2-byte hex"""
-    if n == 0:
-        return "00"
-    else:
-        return hex(n).rstrip("L").lstrip("0x") or "0"
+    return "00" if n==0 else hex(n).rstrip("L").lstrip("0x") or "0"
 
 def hexn(s):
     """hex to integer"""
@@ -116,6 +109,20 @@ def crc(s):
     a=a>>8|(a<<8&0xff00)
     return a
 
+def median(l):
+    """Median object of list (NOT the number median, but the index median)
+    If the list is even in length, it returns both median items.
+
+    Usage:
+        median(["ayy", "lmao", "yee"])
+            Returns:
+                "lmao"
+
+        median(["ayy", "lmao", "ayylmao", "yee"])
+            Returns:
+                ("lmao", "ayylmao")"""
+    return l[(len(l)/2)] if len(l)%2==1 else (l[(len(l)/2)-1], l[(len(l)/2)])
+
 def ntlm(s):
     """ntlm hashing function"""
     import hashlib,binascii
@@ -123,9 +130,9 @@ def ntlm(s):
     return binascii.hexlify(hash1)
 
 def squaredImage(list_of_pixel_tuples):
+    """For PIL; Turns len of a list of RGB pixels into a perfect square (x,y)"""
     c = math.ceil
     s = math.sqrt
-    """For PIL"""
     return (int(c(s(len(list_of_pixel_tuples)))), int(c(s(len(list_of_pixel_tuples)))))
 
 def tobytes(n):
@@ -135,20 +142,12 @@ def tobytes(n):
 
 def dupecheck(object,minimum=1):
     """ Check for duplicates in a list, returns the item if it appears more than the minimum. """
-    if type(object) is list:
-        return [x for x, y in collections.Counter(object).items() if y > minimum]
-    else: raise Fail, "Invalid type - must be list."
+    return [x for x, y in collections.Counter(object).items() if y > minimum]
 
 def ak():
     """Press any key to continue..."""
     from os import system
     system("pause")
-
-def remrn(object):
-    """Strip items in list"""
-    if type(object) is list:
-        return [i.strip() for i in object]
-    else: raise Fail, "Invalid type - must be list."
 
 def average(l):
     return float(sum(l))/len(l)
@@ -169,27 +168,22 @@ def copyclipboard(tocopy):
         else:
             print "Error, enter y or n."
 
-def listshuf(object):
+def shuffled(object):
     """ Shuffles items in a list, returns new list.
     I made a seperate function because I don't think it's ethical
     to use 'list.shuffle()' in the middle of a script."""
-    if type(object) is list:
-        b = [i for i in object]
-        random.shuffle(b)
-        return b
-    else: raise Fail, "Invalid type - must be list."
+    b = [i for i in object]
+    random.shuffle(b)
+    return b
 
-def listinlist1(given, in_this):
-    """ Returns the 'given' object in list form, if it appears in 'in_this'. """
-    if type(given) and type(in_this) is list:
-        return [i for i in given if i in in_this]
-    else: raise Fail, "Invalid type - must be list."
-
-def listinlist2(given, in_this):
-    """ Returns True or False if a 'given' is in 'in_this'. """
-    if type(given) and type(in_this) is list:
+def in_list(given, in_this, boolean=False):
+    """ Returns the 'given' object in list form, if it appears in 'in_this'.
+    Note: If boolean is true, returns True or False respectively"""
+    if boolean:
         return any(x in given for x in in_this)
-    else: raise Fail, "Invalid type - must be list."
+    else:
+        return [i for i in given if i in in_this]
+
 
 def anylistinstring(given, in_this):
     """check if any item in a list is in a string"""
@@ -205,17 +199,6 @@ def rechop(object, n):
     By 'strict', I mean it does not leave a remainder."""
     from re import findall
     return findall('.{%d}'%n,object)
-
-def top(object, default=None):
-    """ Returns most common items in list (tuple)."""
-    if default is None: default = len(object)
-    if type(object) is list:
-        ob = {}
-        for x in object:
-            a = ob.get(x, 0)
-            ob[x] = a+1
-        return reversed(ob.items(), key=lambda x: x[1])[:default]
-    else: raise Fail, "Invalid type - must be list."
 
 def multidivide(delimiter1, delimiter2, object):
     """divides lists within lists
@@ -242,49 +225,18 @@ def replacen(object, char, n):
     usage:
         replacen("Hello", "x", 2)
     returns:
-        "Hxlxo"
-
-    I have no Idea where this would be useful by the way
-        """
+        'Hxlxo'"""
     return ''.join(char if i % n == 0 else chara for i, chara in enumerate(object, 1))
 
 def getreplaced(object, char, n):
     """The exact opposite of replacen()
-    Find the character that gets replaced.
-    This function alone is pretty useless unless you're going to use the replacen function with it."""
+    Find the character that gets replaced."""
     b = []
     full = []
     for (i, chara) in enumerate(object, 1):
         b.append((i, chara))
         full.append(char if i % n == 0 else chara)
     return object[n-1::n]
-
-def npowsqrt(n):
-    """number to the power of the square root of itself.
-
-    As source:
-        n**sqrt(n)"""
-    from math import sqrt
-    return n**sqrt(n)
-
-def sanitize(object):
-    """ Return a list of lowercase words, all consisting of ascii characters. """
-    if type(object) is list:
-        main = []
-        for i in object:
-            parts = []
-            for i2 in i:
-                if i2 in string.ascii_letters:
-                    parts.append(i2)
-            main.append(''.join(parts))
-        return main
-    else: raise Fail, "Invalid type - must be list."
-
-
-def cycle(str, int):
-    """ ROT Style cycler for strings """
-    components = [ord(i) for i in str]
-    return ''.join([chr(i+int) for i in components if i < 255])
 
 def dummylist(length, contains):
     """ Generate a dummy list
@@ -332,19 +284,9 @@ def recur(object, amt):
             total.append(i)
     return ''.join(total[:amt])
 
-def clean(object, delimiter=''):
-    """For strings, basically removes crap that isn't string-y."""
-    b = []
-    for i in object:
-        if i in string.ascii_letters:
-            b.append(i.lower())
-    return delimiter.join(b)
-
 def combinelist(object):
     """ Join a list of tuples or lists into a single list"""
-    if type(object) is list:
-        return [i for i2 in object for i in i2]
-    else: raise Fail, "Invalid type - must be list."
+    return [i for i2 in object for i in i2]
 
 def SysInfo(Info):
     """Information Available:
@@ -429,7 +371,7 @@ def r(*args):
     range(4) = [0,1,2,3]
 
     r(4) = [1,2,3,4]
-"""
+    """
     if len(args) == 0:
         raise ArgumentError, "No arguments provided."
     elif len(args) == 1:
@@ -458,19 +400,12 @@ def percent(part, whole, factor=100):
         33.33333333"""
     return factor * float(part)/float(whole)
 
-def pdo(function, object):
-    """print something as well as do it too"""
-    print(object)
-    function(object)
-
-def pythagorean(a, b, squared=True):
+def pythagorean(a, b, rooted=True):
     """Just a Pythagorean theorem"""
-    from math import sqrt
-    return sqrt(a**2+b**2) if squared else a**2+b**2
+    return (a**2+b**2)**0.5 if rooted else a**2+b**2
 
 def formatter(t, delimiter='-', l=50):
-    """makes a tuple look pretty
-    ('b', 491) would become b---------491"""
+    """makes a tuple look pretty (used in termpeaser)"""
     aa = len(''.join(str(i) for i in t))
     dashes = delimiter*(l-aa)
     return dashes.join(str(i) for i in t)
@@ -482,14 +417,13 @@ def incrup(n, function):
     Returns:
         [[1,2],[3,4,5,6,7],[8,9,10,11,12,13,14]]
 
-    What does this mean?
+    > What does this mean?
     2 = first 2 numbers
     5 = next 5 numbers
     7 = last 7 numbers
 
-    functions:
-        r       <--- defined earlier in utils.py
-        range
+    important:
+        r       <--- defined earlier
 
     This function was designed mainly for randprob()
 
@@ -561,7 +495,7 @@ def between(string, start, stop):
     ...less than beautiful."""
 
     begindex = string.find(start)+len(start)
-    endex = string.find(stop)
+    endex    = string.find(stop)
     return string[begindex:endex]
 
 def shorten(string, n):
@@ -574,10 +508,7 @@ def shorten(string, n):
     Returns:
         "Hello,..."
         """
-    if len(string) > n:
-        return string[:n]+'...'
-    else:
-        return string
+    return string[:n]+'...' if len(string) > n else string
 
 def newDynamicType(name, d):
     """Create a dynamic, fully variable type.
@@ -591,15 +522,13 @@ def newDynamicType(name, d):
 def spam_find(spam, strictness=15):
     """the higher the strictness, the more strict it is (100 = max).
 
-    0   = nothing is spam
+    0   = NOTHING is spam
     15  = pretty fair
     25  = kinda strict
     50  = super strict
+    75  = very strict
     100 = EVERYTHING is spam."""
 
     part = ''.join(list(set(spam)))
     pcent = percent(len(part), len(spam))
-    if pcent <= strictness:
-        return True
-    else:
-        return False
+    return True if pcent <= strictness else False
