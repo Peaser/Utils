@@ -163,7 +163,7 @@ def in_list(given, in_this, boolean=False):
     Note: If boolean is true, returns True or False respectively
     """
     if boolean:
-        return any(x in given for x in in_this) if boolean
+        return any(x in given for x in in_this)
     else:
         return [i for i in given if i in in_this]
 
@@ -173,7 +173,7 @@ def anylistinstring(given, in_this):
     check if any item in a list is in a string
     """
     return True if any(i in given for i in in_this) else False
-        
+
 
 def chop(object,length):
     """
@@ -473,7 +473,7 @@ def xor(a, b, method=0):
         return a ^ b
     elif method == 2:
         return (a and not b) or (not a and b)
-    else raise ArgumentError
+    else: raise ArgumentError
 
 def randweight(dict):
     """
