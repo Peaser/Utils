@@ -5,6 +5,8 @@ general laziness utilities
 """
 
 dt = os.environ['userprofile']+'\\Desktop\\' #Desktop EV
+headers = ('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1') #mechanize
+
 
 class ArgumentError(Exception):
     """
@@ -51,8 +53,6 @@ class Toggleable(object):
 
     def __init__(self, boolean=True):
         self.boolean = boolean
-        if type(self.boolean) is not bool:
-            raise TypeError, 'type {} is not an acceptable type, must be bool'.format(type(self.boolean))
 
     def __repr__(self):
         return str(self.boolean)
@@ -77,13 +77,15 @@ def stdout(s):
     sys.stdout.write("{0}\r".format(s))
     sys.stdout.flush()
 
-def center(s):
+def center(s, width):
     """
     center-justify
-    !! DEPRECATED !!
+    WARNING: DEPRECATED
+    and by that I mean I didn't know it already existed..
     """
     n = len(s)
-    return ' '*(40-(n/2))+s+' '*(40-(n/2))
+    na = width/2
+    return ' '*(na-(n/2))+s+' '*(na-(n/2))
 
 def crc(s):
     """
@@ -161,7 +163,7 @@ def in_list(given, in_this, boolean=False):
     Note: If boolean is true, returns True or False respectively
     """
     if boolean:
-        return any(x in given for x in in_this)
+        return any(x in given for x in in_this) if boolean
     else:
         return [i for i in given if i in in_this]
 
@@ -176,8 +178,11 @@ def anylistinstring(given, in_this):
 def chop(object,length):
     """
     Slice up an item by character amount (length)
+    uses __lambda__ for source
     """
     return [object[i:i+length] for i in range(0, len(object), length)]
+
+chop.__lambda__ = "lambda o, l: [o[i:i+l] for i in range(0, len(o), l)]"
 
 def rechop(object, n):
     """
@@ -203,9 +208,11 @@ def multidivide(delimiter1, delimiter2, object):
 def halflist(object):
     """
     slice a list in half
+    uses __lambda__ for source
     """
     half = len(object)/2
     return object[:half], object[half:]
+halflist.__lambda__ = "lambda o: o[:len(o)/2],o[len(o)/2:]"
 
 def replacen(object, char, n):
     """
