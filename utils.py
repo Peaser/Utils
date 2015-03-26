@@ -1,4 +1,4 @@
-import collections, string, datetime, random, math, os, sys
+import collections, string, datetime, random, math, os, sys, re
 
 """
 general laziness utilities
@@ -507,16 +507,20 @@ def randprob(dict):
 
 def between(string, start, stop):
     """
-    find a string between two substrings in a main string
-    Usage:
-        thestring = "This is the string. Find THIS HERE and end."
-        print between(thestring, "Find ", " and end")
+    Between function
+    Uses Regex to search through <string>, to find
+    everything BETWEEN <start> and <stop>.
 
+    Example:
+
+        >>> k = "I want to find this right here, but not this."
+        >>> between(k, "I want to find ", ", but not this.")
+        "this right here"
     """
-
-    begindex = string.find(start)+len(start)
-    endex    = string.find(stop)
-    return string[begindex:endex]
+    pattern = "{0}(.*){1}".format(start, stop)
+    regex = re.compile(pattern)
+    data = regex.findall(string)
+    return data
 
 def shorten(string, n):
     """
