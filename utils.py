@@ -5,7 +5,7 @@ general laziness utilities
 """
 
 dt = os.environ['userprofile']+'\\Desktop\\' #Desktop EV
-headers = ('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1') #mechanize
+headers = ('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1') #mechanize header
 
 
 class ArgumentError(Exception):
@@ -81,7 +81,8 @@ def center(s, width):
     """
     center-justify
     WARNING: DEPRECATED
-    and by that I mean I didn't know it already existed..
+    and by that I mean I didn't know it already existed
+    in the string module until it was too late
     """
     n = len(s)
     na = width/2
@@ -108,9 +109,9 @@ def crc(s):
     a&=0xffff
     a=a>>8|(a<<8&0xff00)
     return a
-
 crcHexLiteral = lambda s: hex(crc(s)).rstrip("L")
 crcHexLiteral.__doc__ = "Literal hex identifier of an object applied with crc function"
+crcHexLiteral.__lambda__ = "lambda s: hex(crc(s)).rstrip(\"L\")"
 
 def median(l):
     """
@@ -150,14 +151,14 @@ def dupecheck(object,minimum=1):
     """
     return [x for x, y in collections.Counter(object).items() if y > minimum]
 
-def ak():
+def pause():
     """
     Press any key to continue...
     """
     from os import system
     system("pause")
 
-def in_list(given, in_this, boolean=False):
+def inlist(given, in_this, boolean=False):
     """
     Returns the 'given' object in list form, if it appears in 'in_this'.
     Note: If boolean is true, returns True or False respectively
@@ -168,7 +169,7 @@ def in_list(given, in_this, boolean=False):
         return [i for i in given if i in in_this]
 
 
-def anylistinstring(given, in_this):
+def anyinstr(given, in_this):
     """
     check if any item in a list is in a string
     """
@@ -181,7 +182,6 @@ def chop(object,length):
     uses __lambda__ for source
     """
     return [object[i:i+length] for i in range(0, len(object), length)]
-
 chop.__lambda__ = "lambda o, l: [o[i:i+l] for i in range(0, len(o), l)]"
 
 def rechop(object, n):
@@ -361,16 +361,6 @@ def secsFormat(n, asTimeDelta=False, ):
         s=n%60
         return(h,m,s)
 
-def isin(iterable, object):
-    """
-    isin(['yes','no'], 'asdiasno')  ->  True
-    """
-    for i in iterable:
-        if i in object:
-            return True
-            break
-    return False
-
 def intertwine(*args):
     """
     Turns multiple strings into a single by intertwining it.
@@ -424,8 +414,7 @@ def percent(part, whole, factor=100):
     """
     return factor * float(part)/float(whole)
 
-def pythagorean(a, b, rooted=True):
-    return (a**2+b**2)**0.5 if rooted else a**2+b**2
+pythag = lambda a, b: (a**2+b**2)**.5
 
 def formatter(t, delimiter='-', l=50):
     """
@@ -461,20 +450,6 @@ def incrup(n, function=r):
         last = new
     return result
 
-def xor(a, b, method=0):
-    """
-    Methodical xor
-    """
-    a = bool(a)
-    b = bool(b)
-    if method == 0:
-        return a != b
-    elif method == 1:
-        return a ^ b
-    elif method == 2:
-        return (a and not b) or (not a and b)
-    else: raise ArgumentError
-
 def randweight(dict):
     """
     Pick key from dictionary based on weight (values)
@@ -498,7 +473,7 @@ def randprob(dict):
     keys = [i for i in dict]
 
     if sum(parts) != 100:
-        raise ValueError, "The sum of all the keys' values must equal 100. Yours equal {0}".format(sum(parts))
+        raise ValueError, "The sum of all the keys' values must equal 100."
 
     ranges = incrup(parts, r)
     thevalue = random.randint(1,100)
@@ -517,7 +492,7 @@ def between(string, start, stop):
         >>> between(k, "I want to find ", ", but not this.")
         "this right here"
     """
-    pattern = "{0}(.*){1}".format(start, stop)
+    pattern = "{0}(.+?){1}".format(start, stop)
     regex = re.compile(pattern)
     data = regex.findall(string)
     return data
@@ -525,7 +500,7 @@ def between(string, start, stop):
 def shorten(string, n):
     """
     If a string is longer than n character long, cut it off and append an ellipsis.
-    Note: The 3 dots in the ellipses *DO NOT* count towards n.
+    Note: The 3 dots in the ellipses do not count towards n.
     Usage:
         shorten("Hello, world!", 6)
 
@@ -551,7 +526,32 @@ def spam_find(spam, strictness=15):
     75  = very strict
     100 = EVERYTHING is spam.
     """
-
     part = ''.join(list(set(spam)))
     pcent = percent(len(part), len(spam))
     return True if pcent <= strictness else False
+
+def intrp(string):
+    """string interpolation.
+        given that the respective variables are declared...
+
+            >>> string_ex = "Hello, world!"
+            >>> intrp("I'd like to say #{string_ex}")
+            "I'd like to say Hello, world!"
+
+            >>> age = 20
+            >>> intrp("I am #{age} years old.")
+            "I am 20 years old."
+    """
+    if "#{}" in string:
+        raise KeyError, "Empty variable identifier"
+    import re
+    regex = re.compile("(#{(.+?)})")
+    results = regex.findall(string)
+    for match in results:
+        try:
+            eval(match[1])
+        except:
+            raise KeyError, "The variable: '%s' is not defined." % match[1]
+        variable = str(eval(match[1]))
+        string = string.replace(match[0], variable)
+    return string
