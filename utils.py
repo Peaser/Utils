@@ -530,23 +530,36 @@ def spam_find(spam, strictness=15):
     pcent = percent(len(part), len(spam))
     return True if pcent <= strictness else False
 
-def intrp(string):
+def i(string):
     """string interpolation.
         given that the respective variables are declared...
 
             >>> string_ex = "Hello, world!"
-            >>> intrp("I'd like to say #{string_ex}")
+            >>> i("I'd like to say #{string_ex}")
             "I'd like to say Hello, world!"
 
             >>> age = 20
-            >>> intrp("I am #{age} years old.")
+            >>> i("I am #{age} years old.")
             "I am 20 years old."
     """
     if "#{}" in string:
         raise KeyError, "Empty variable identifier"
-    import re
-    regex = re.compile("(#{(.+?)})")
-    results = regex.findall(string)
+    results = re.findall("(#{(.+?)})", string)
+    for match in results:
+        try:
+            eval(match[1])
+        except:
+            raise KeyError, "The variable: '%s' is not defined." % match[1]
+        variable = str(eval(match[1]))
+        string = string.replace(match[0], variable)
+    return string
+
+def i_(string):
+    """alternate string interpolation that uses the following syntax:
+some text some text $variable some text
+this matches to "variable"
+    """
+    results = re.findall(r"(\$(.+?))\b", string)
     for match in results:
         try:
             eval(match[1])
