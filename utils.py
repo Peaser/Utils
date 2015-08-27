@@ -267,6 +267,44 @@ class sha512(object):
 
     def copy(self):
         return copy.deepcopy(self)
+ 
+class Pad(object):
+    """One time pad cryptography class"""
+    def __init__(self):
+        super(Pad, self).__init__()
+
+    def getRandomCypher(self, data):
+        """Generates random key and returns dict with key and cyphered data."""
+        key = os.urandom(len(data))
+        pairs = [[ord(a) for a in i] for i in zip(data, key)]
+        retval = [chr(i[0]^i[1]) for i in pairs]
+        return {"KEY":key, "CRYPT":str().join(retval)}
+ 
+    def decypher(self, dict):
+        """Decyphers with a dict. Takes dict with keys 'KEY' and 'CRYPT'."""
+        if list(sorted(dict.keys())) != ["CRYPT","KEY"]:
+            raise SyntaxError, "Invalid argument dict"
+        pairs = [[ord(a) for a in i] for i in zip(dict["KEY"], dict["CRYPT"])]
+        retval = [chr(i[0]^i[1]) for i in pairs]
+        return str().join(retval)
+ 
+    def cypherFile(self, path):
+        kp = self.getRandomCypher(open(path, "rb").read())
+        with open("outfile.bin", "wb") as of:
+            of.write(kp["CRYPT"])
+        with open("cryptkey.KEY", "wb") as ck:
+            ckdat = """START?{d}?END\nFILE_NAME:'{fn}'"""\
+            .format(d=kp["KEY"].encode("base64"), fn=os.path.split(path)[1])
+            ck.write(ckdat)
+ 
+    def decypherFile(self, keyFile, cypherFile):
+        keyDat = open(keyFile, "rb").read()
+        cypherDat = open(cypherFile, "rb").read()
+        keyRead = re.findall("START\?(.+)\?END", keyDat, re.DOTALL)[0]
+        FName   = re.findall("FILE_NAME:'(.+)'", keyDat, re.DOTALL)[0]
+        Decyphered = self.decypher({"KEY":keyRead.decode("base64"), "CRYPT":cypherDat})
+        with open(FName, "wb") as file:
+            file.write(Decyphered)
 
 def dm(p):
     """
@@ -773,3 +811,27 @@ this matches to "variable"
         variable = str(eval(match[1]))
         string = string.replace(match[0], variable)
     return string
+
+def dicttrans(string, dict):
+    """Translate using a dict. simpler than replace()"""
+    for i in dict:
+        string = string.replace(i, dict[i])
+    return string
+
+def unixmatch(query, l):
+    """This function is experimental.
+Unix-style terminal matching.
+
+>>> unixmatch("*.html", pages)
+["index.html", "test.html"]
+
+>>> unixmatch("pic_?.jpg", files)
+["pic_1.jpg", "pic_2.jpg", "pic_3.jpg"]
+
+>>> unixmatch("b?g", wordlist)
+["bag", "beg", "big", "bog", "bug"]"""
+
+
+    query   = dictTrans(query, {"?":".", "*":".*"})
+    matches = [re.findall(query, i) for i in l]
+    return    [i[0] for i in matches if i]
