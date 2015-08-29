@@ -52,11 +52,13 @@ class Toggleable(object):
     def __repr__(self):
         return str(self.boolean)
 
+    _map = {
+        True: False,
+        False: True,
+    }
+
     def toggle(self):
-        if self.boolean == True:
-            self.boolean = False
-        elif self.boolean == False:
-            self.boolean = True
+        self.boolean = _map[self.boolean]
 
 class B128(object):
     """
