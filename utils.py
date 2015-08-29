@@ -1,11 +1,7 @@
 import collections, string, datetime, random, math, os, sys, re, base64, copy, struct
-"""
-general laziness utilities
-"""
 
 dt = os.environ['userprofile']+'\\Desktop\\' #Desktop EV
 headers = ('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1') #mechanize header
-
 
 class ArgumentError(Exception):
     """
@@ -320,17 +316,6 @@ def stdout(s):
     sys.stdout.write("{0}\r".format(s))
     sys.stdout.flush()
 
-def center(s, width):
-    """
-    center-justify
-    WARNING: DEPRECATED
-    and by that I mean I didn't know it already existed
-    in the string module until it was too late
-    """
-    n = len(s)
-    na = width/2
-    return ' '*(na-(n/2))+s+' '*(na-(n/2))
-
 def crc(s):
     """
     Basic Redundancy check
@@ -398,25 +383,20 @@ def pause():
     """
     Press any key to continue...
     """
-    from os import system
-    system("pause")
+    os.system("pause")
 
-def inlist(given, in_this, boolean=False):
+def inlist(given, in_this, return_bool=False):
     """
     Returns the 'given' object in list form, if it appears in 'in_this'.
     Note: If boolean is true, returns True or False respectively
     """
-    if boolean:
-        return any(x in given for x in in_this)
-    else:
-        return [i for i in given if i in in_this]
-
+    return any(x in given for x in in_this) if return_bool else [i for i in given if i in in_this]
 
 def anyinstr(given, in_this):
     """
     check if any item in a list is in a string
     """
-    return True if any(i in given for i in in_this) else False
+    return any(i in given for i in in_this)
 
 
 def chop(object,length):
@@ -432,8 +412,8 @@ def rechop(object, n):
     Strict version of chop() that uses Regular Expressions.
     By 'strict', I mean it does not leave a remainder.
     """
-    from re import findall
-    return findall('.{%d}'%n,object)
+
+    return re.findall('.{%d}'%n,object)
 
 def multidivide(delimiter1, delimiter2, object):
     """
@@ -442,10 +422,7 @@ def multidivide(delimiter1, delimiter2, object):
     """
     final = []
     for i in object:
-        if type(i) is tuple:
-            final.append(list(i))
-        else:
-            final.append(i)
+        final.append(list(i) if type(i) == tuple else i)
     return delimiter1.join([delimiter2.join(i) for i in final])
 
 def halflist(object):
@@ -493,15 +470,14 @@ def dummylist(length, contains):
 
     Todo: add tuples, lists,
     """
-    def create(Type):
-        if Type is None:
-            return None
-        if Type is str:
-            return ''.join(random.choice(string.ascii_lowercase) for i in range(random.randint(3,8))).capitalize()
-        if Type is int:
-            return random.randint(1,10000)
-        if Type is float:
-            return random.random()*random.randint(1,256)
+
+    creatorDict = {
+        None: None,
+        str: ''.join(random.choice(string.ascii_lowercase) for i in range(random.randint(3,8))).capitalize(),
+        int: random.randint(1,10000),
+        float: random.random()*random.randint(1,256)
+    }
+
     final = []
     picker = []
     if len(contains)==0: return []
@@ -509,17 +485,14 @@ def dummylist(length, contains):
         for i in range(length):
             picker.append(random.choice(contains))
         for i2 in picker:
-            final.append(create(i2))
+            final.append(creatorDict[i2])
         return final
 
 def vectorAverage(object):
     """
     Average out all values in a vector3
     """
-    ret = []
-    for i in range(len(object)):
-        ret.append(reduce(lambda x,y:x+y,object)/len(object))
-    return tuple(ret)
+    return tuple([reduce(lambda x,y:x+y,object)/len(object) for i in range(len(object))])
 
 def recur(object, amt):
     """
@@ -581,8 +554,8 @@ def swap(thelist, what, replacer):
     Swap an item in a list with something else
     """
     for n,i in enumerate(thelist):
-        if i==what:
-            thelist[n]=replacer
+        if i == what:
+            thelist[n] = replacer
     return thelist
 
 def getUt(formatted=True):
@@ -661,7 +634,7 @@ pythag = lambda a, b: (a**2+b**2)**.5
 
 def formatter(t, delimiter='-', l=50):
     """
-    makes a tuple look pretty (used in termpeaser)
+    makes a tuple look pretty
     """
     aa = len(''.join(str(i) for i in t))
     dashes = delimiter*(l-aa)
@@ -830,7 +803,6 @@ Unix-style terminal matching.
 
 >>> unixmatch("b?g", wordlist)
 ["bag", "beg", "big", "bog", "bug"]"""
-
 
     query   = dictTrans(query, {"?":".", "*":".*"})
     matches = [re.findall(query, i) for i in l]
