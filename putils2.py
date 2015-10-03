@@ -1,4 +1,4 @@
-import collections, string, datetime, random, math, os, sys, re, base64, copy, struct
+import collections, string, datetime, operator, random, math, os, sys, re, base64, copy, struct
 
 dt = os.environ['userprofile']+'\\Desktop\\' #Desktop EV
 headers = ('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1') #mechanize header
@@ -52,13 +52,8 @@ class Toggleable(object):
     def __repr__(self):
         return str(self.boolean)
 
-    _map = {
-        True: False,
-        False: True,
-    }
-
     def toggle(self):
-        self.boolean = _map[self.boolean]
+        self.boolean = not self.boolean
 
 class B128(object):
     """
@@ -809,3 +804,7 @@ Unix-style terminal matching.
     query   = dictTrans(query, {"?":".", "*":".*"})
     matches = [re.findall(query, i) for i in l]
     return    [i[0] for i in matches if i]
+
+def highestKey(stats, index=1):
+    """Returns dict item with highest value (key)"""
+    return max(stats.iteritems(), key=operator.itemgetter(index))[0]
